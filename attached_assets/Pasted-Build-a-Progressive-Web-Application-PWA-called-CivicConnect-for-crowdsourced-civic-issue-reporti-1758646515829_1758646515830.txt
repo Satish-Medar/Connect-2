@@ -1,0 +1,82 @@
+Build a Progressive Web Application (PWA) called “CivicConnect” for crowdsourced civic issue reporting and resolution.
+
+Features Required
+Citizen/User Side (Frontend PWA)
+
+Mobile-first responsive design.
+
+Allow users to report issues with:
+
+Photo upload (camera/gallery).
+
+Automatic GPS location tagging.
+
+Short text or optional voice-to-text explanation.
+
+Display a live interactive map with reported issues (cluster markers for multiple issues in the same area).
+
+Each report should have a status (e.g., Submitted → Acknowledged → In Progress → Resolved).
+
+Push notifications (via PWA service workers) to update citizens about their report’s progress.
+
+Citizens can track their submitted reports in a “My Reports” section.
+
+Municipal Staff/Admin Dashboard (Web)
+
+Secure login for admin/staff.
+
+Centralized dashboard with filtering and sorting of issues by:
+
+Category (potholes, garbage, lights, etc.)
+
+Location (map view & list view).
+
+Priority (based on urgency or volume of submissions).
+
+Reports automatically routed to relevant departments (e.g., sanitation, public works).
+
+Staff can assign tasks, update status, and send updates to users.
+
+Analytics module:
+
+Trends of reported issues.
+
+Response times per department.
+
+Heatmaps of recurring problem areas.
+
+Backend
+
+RESTful APIs with authentication & role-based access (citizen vs. staff).
+
+Scalable backend for handling images, concurrent users, and notifications.
+
+Store data in a structured way (e.g., PostgreSQL for relational data, cloud storage for media).
+
+WebSocket or real-time updates for dashboard/map sync.
+
+Technical Requirements
+
+Use React + Vite (or Next.js) for frontend with TailwindCSS for styling.
+
+Backend with Node.js + Express (or Fastify).
+
+Database: PostgreSQL (with Prisma ORM) or MongoDB if better for flexibility.
+
+Deployable as a PWA (installable on mobile, works offline for draft reports).
+
+Authentication with JWT.
+
+Map integration using Leaflet.js or Google Maps API.
+
+Notifications with service workers and/or email.
+
+Deliverables
+
+Full-stack codebase (frontend + backend).
+
+PWA build optimized for web and mobile devices.
+
+Admin dashboard accessible via browser.
+
+Documentation for setup, deployment, and API usage.
