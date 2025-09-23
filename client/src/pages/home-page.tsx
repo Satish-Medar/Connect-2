@@ -28,7 +28,7 @@ import {
   Bell
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { IssueWithReporter, User } from "@shared/schema";
+import { IssueWithReporter, User, Achievement } from "@shared/schema";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -43,12 +43,17 @@ export default function HomePage() {
     enabled: !!user,
   });
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{
+    active: number;
+    inProgress: number;
+    resolved: number;
+    avgResponseTime: number;
+  }>({
     queryKey: ["/api/admin/stats"],
     enabled: !!user && (user.role === "admin" || user.role === "staff"),
   });
 
-  const { data: achievements = [] } = useQuery({
+  const { data: achievements = [] } = useQuery<Achievement[]>({
     queryKey: ["/api/users", user?.id, "achievements"],
     enabled: !!user,
   });
@@ -166,7 +171,7 @@ export default function HomePage() {
                   <Camera className="text-2xl text-secondary mb-1 mx-auto" />
                   <div className="text-xs font-medium">First Reporter</div>
                   <div className="text-xs text-muted-foreground">
-                    {achievements.some(a => a.type === 'first_reporter') ? 'Unlocked' : 'Locked'}
+                    {achievements.some((a: Achievement) => a.type === 'first_reporter') ? 'Unlocked' : 'Locked'}
                   </div>
                 </div>
                 
@@ -240,7 +245,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Active Reports</p>
-                        <p className="text-2xl font-bold text-destructive" data-testid="stat-active-reports">{stats.active}</p>
+                        <p className="text-2xl font-bold text-destructive" data-testid="stat-active-reports">{stats?.active || 0}</p>
                       </div>
                       <CircleAlert className="text-destructive text-xl" />
                     </div>
@@ -252,7 +257,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">In Progress</p>
-                        <p className="text-2xl font-bold text-accent" data-testid="stat-in-progress">{stats.inProgress}</p>
+                        <p className="text-2xl font-bold text-accent" data-testid="stat-in-progress">{stats?.inProgress || 0}</p>
                       </div>
                       <Wrench className="text-accent text-xl" />
                     </div>
@@ -264,7 +269,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Resolved</p>
-                        <p className="text-2xl font-bold text-secondary" data-testid="stat-resolved">{stats.resolved}</p>
+                        <p className="text-2xl font-bold text-secondary" data-testid="stat-resolved">{stats?.resolved || 0}</p>
                       </div>
                       <CheckCircle className="text-secondary text-xl" />
                     </div>
@@ -276,7 +281,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Avg Response</p>
-                        <p className="text-2xl font-bold text-primary" data-testid="stat-avg-response">{stats.avgResponseTime} days</p>
+                        <p className="text-2xl font-bold text-primary" data-testid="stat-avg-response">{stats?.avgResponseTime || 0} days</p>
                       </div>
                       <Clock className="text-primary text-xl" />
                     </div>

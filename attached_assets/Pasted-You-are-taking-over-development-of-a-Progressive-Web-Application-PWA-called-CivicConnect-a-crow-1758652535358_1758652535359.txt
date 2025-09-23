@@ -1,0 +1,67 @@
+You are taking over development of a Progressive Web Application (PWA) called “CivicConnect”, a crowdsourced civic issue reporting and resolution platform.
+
+Context & Goals
+
+This app is being built for a national hackathon with 300 competing teams. To win, our solution must stand out on 4 evaluation factors:
+
+Novelty – innovative, AI/ML-powered or creative features not in typical reporting apps.
+
+Feasibility – realistic to build within hackathon constraints.
+
+Scalability – works across multiple cities, supports large user/media volumes.
+
+Economics – lightweight, cheaper, and more efficient than existing municipal systems.
+
+Baseline Features (Already Expected)
+
+Issue reporting: photo upload, GPS auto-tagging, text/voice notes.
+
+Live interactive map of reported issues.
+
+Admin dashboard: filter issues by category, location, or priority.
+
+Automatic routing of issues to correct departments.
+
+Notifications and status tracking (Submitted → Acknowledged → In Progress → Resolved).
+
+Analytics dashboard for trends and response times.
+
+Innovative Features to Add (WOW Factor)
+
+AI-powered classification & prioritization: Auto-detect issue type + severity from photo/text.
+
+Smart ML-based routing: Predicts the right department/staff from history + location.
+
+Predictive maintenance: Identifies recurring issues (e.g., potholes in the same street) and alerts municipalities before they escalate.
+
+Crowdsourced validation + AI deduplication: Citizens can upvote/verify reports; AI merges duplicate issues.
+
+Gamification/community trust: Citizens earn badges/points for valid reports; leaderboards encourage engagement.
+
+Your Tasks
+
+Analyze the existing project code/work:
+
+Identify what is already implemented.
+
+Highlight gaps and missing features.
+
+Check if OpenAI has been replaced with Gemini API for AI tasks (our key constraint: we use Gemini API, not OpenAI).
+
+Create a step-by-step plan to complete the app end-to-end, covering both baseline + innovative features.
+
+Implement the missing parts in code, making sure:
+
+Frontend is React + Tailwind, installable as a PWA.
+
+Backend is Node.js/Express, with PostgreSQL (Prisma ORM) or MongoDB.
+
+Maps use Leaflet.js or Google Maps API.
+
+AI/ML tasks run via Gemini API (using @google/generative-ai).
+
+Notifications work via service workers.
+
+Code is optimized for scalability and low-cost deployment.
+
+Provide documentation + setup instructions so anyone can run it easily.
