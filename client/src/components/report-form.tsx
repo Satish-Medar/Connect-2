@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { SimilarIssuesDialog } from "./similar-issues-dialog";
 import { Camera, MapPin, Mic, Upload, Loader2, X, CheckCircle } from "lucide-react";
 
 interface ReportFormProps {
@@ -32,6 +33,9 @@ export function ReportForm({ onSuccess, onCancel }: ReportFormProps) {
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [similarIssues, setSimilarIssues] = useState<any[]>([]);
+  const [showSimilarIssuesDialog, setShowSimilarIssuesDialog] = useState(false);
+  const [pendingIssueData, setPendingIssueData] = useState<any>(null);
   
   const camera = useCamera();
   const geolocation = useGeolocation();
@@ -92,15 +96,60 @@ export function ReportForm({ onSuccess, onCancel }: ReportFormProps) {
     }
   }, [camera.capturedImage, uploadMutation.isPending, aiAnalysis]);
 
-  // Submit issue report
+  // Submit issue report with enhanced duplicate detection
   const submitMutation = useMutation({
     mutationFn: async (issueData: any) => {
       const res = await apiRequest("POST", "/api/issues", issueData);
+      const data = await res.json();
+      
+      // Check if similar issues were found
+      if (data.type === 'similar_issues_found') {
+        return { type: 'similar_issues', data };
+      }
+      
+      return { type: 'success', data };
+    },
+    onSuccess: (result) => {
+      if (result.type === 'similar_issues') {
+        // Show similar issues dialog
+        setSimilarIssues(result.data.similarIssues);
+        setPendingIssueData(result.data.submittedIssue);
+        setShowSimilarIssuesDialog(true);
+      } else {
+        // Normal success flow
+        queryClient.invalidateQueries({ queryKey: ["/api/issues"] });
+        setIsSubmitted(true);
+        toast({
+          title: "Issue reported!",
+          description: "Thank you for helping improve your community.",
+        });
+        setTimeout(() => {
+          onSuccess?.();
+        }, 2000);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Report failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Force submit anyway (when user chooses to proceed despite similar issues)
+  const forceSubmitMutation = useMutation({
+    mutationFn: async (issueData: any) => {
+      const res = await apiRequest("POST", "/api/issues", {
+        ...issueData,
+        forceSubmit: true // Flag to bypass duplicate detection
+      });
       return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/issues"] });
       setIsSubmitted(true);
+      setShowSimilarIssuesDialog(false);
       toast({
         title: "Issue reported!",
         description: "Thank you for helping improve your community.",
@@ -218,13 +267,28 @@ export function ReportForm({ onSuccess, onCancel }: ReportFormProps) {
     );
   }
 
+  const handleProceedAnyway = () => {
+    if (pendingIssueData) {
+      forceSubmitMutation.mutate(pendingIssueData);
+    }
+  };
+
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Report a Civic Issue</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <>
+      <SimilarIssuesDialog
+        open={showSimilarIssuesDialog}
+        onOpenChange={setShowSimilarIssuesDialog}
+        similarIssues={similarIssues}
+        submittedIssue={pendingIssueData}
+        onProceedAnyway={handleProceedAnyway}
+      />
+      
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Report a Civic Issue</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
           {/* Photo Section */}
           <div className="space-y-4">
             <Label className="text-base font-semibold">Photo Evidence</Label>
@@ -479,5 +543,6 @@ export function ReportForm({ onSuccess, onCancel }: ReportFormProps) {
         </form>
       </CardContent>
     </Card>
+    </>
   );
 }

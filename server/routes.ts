@@ -85,8 +85,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reporterId: req.user!.id
       });
 
-      // Check for similar issues nearby and return them for user decision
-      if (issueData.latitude && issueData.longitude) {
+      // Check for similar issues nearby and return them for user decision (unless force submit)
+      if (issueData.latitude && issueData.longitude && !req.body.forceSubmit) {
         const normalizedLocation = normalizeLocation(issueData.address || "");
         
         // Search with larger radius for better detection
