@@ -29,9 +29,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { IssueWithReporter, User, Achievement } from "@shared/schema";
+import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data: recentIssues = [] } = useQuery<IssueWithReporter[]>({
     queryKey: ["/api/issues"],
@@ -68,8 +70,8 @@ export default function HomePage() {
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-2xl font-bold mb-2">Report an Issue</h2>
-                <p className="text-primary-foreground/80">Help improve your community with AI-powered reporting</p>
+                <h2 className="text-2xl font-bold mb-2">{t('reportIssueTitle')}</h2>
+                <p className="text-primary-foreground/80">{t('reportIssueSubtitle')}</p>
               </div>
               <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
                 <Camera className="text-2xl" />
@@ -81,8 +83,8 @@ export default function HomePage() {
                 <Button variant="ghost" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl p-4 h-auto text-center transition-all transform hover:scale-105 w-full" data-testid="button-take-photo">
                   <div className="flex flex-col items-center space-y-2">
                     <Camera className="text-2xl" />
-                    <div className="font-medium">Take Photo</div>
-                    <div className="text-xs opacity-80">AI will detect issue type</div>
+                    <div className="font-medium">{t('takePhoto')}</div>
+                    <div className="text-xs opacity-80">{t('aiDetectType')}</div>
                   </div>
                 </Button>
               </Link>
@@ -90,8 +92,8 @@ export default function HomePage() {
                 <Button variant="ghost" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl p-4 h-auto text-center transition-all transform hover:scale-105 w-full" data-testid="button-gps-location">
                   <div className="flex flex-col items-center space-y-2">
                     <MapPin className="text-2xl" />
-                    <div className="font-medium">GPS Location</div>
-                    <div className="text-xs opacity-80">Auto-tagged</div>
+                    <div className="font-medium">{t('gpsLocation')}</div>
+                    <div className="text-xs opacity-80">{t('autoTagged')}</div>
                   </div>
                 </Button>
               </Link>
@@ -99,8 +101,8 @@ export default function HomePage() {
                 <Button variant="ghost" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl p-4 h-auto text-center transition-all transform hover:scale-105 w-full" data-testid="button-voice-input">
                   <div className="flex flex-col items-center space-y-2">
                     <Mic className="text-2xl" />
-                    <div className="font-medium">Voice Input</div>
-                    <div className="text-xs opacity-80">Speech-to-text</div>
+                    <div className="font-medium">{t('voiceInput')}</div>
+                    <div className="text-xs opacity-80">{t('speechToText')}</div>
                   </div>
                 </Button>
               </Link>
@@ -118,7 +120,7 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Community Leaders</CardTitle>
+                <CardTitle className="text-lg font-semibold">{t('communityLeaders')}</CardTitle>
                 <Trophy className="text-accent" />
               </div>
             </CardHeader>

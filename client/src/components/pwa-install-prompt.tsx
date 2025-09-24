@@ -3,10 +3,12 @@ import { usePWA } from '@/hooks/use-pwa';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Download, Smartphone } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function PWAInstallPrompt() {
   const { isInstallable, isInstalled, installApp } = usePWA();
   const [dismissed, setDismissed] = useState(false);
+  const { t } = useTranslation();
 
   if (!isInstallable || isInstalled || dismissed) {
     return null;
@@ -42,10 +44,9 @@ export function PWAInstallPrompt() {
           </div>
           
           <div className="flex-1">
-            <h3 className="font-semibold mb-1">Install CivicConnect</h3>
+            <h3 className="font-semibold mb-1">{t('installPromptTitle')}</h3>
             <p className="text-sm opacity-90 mb-3">
-              Get the full app experience! Install CivicConnect for faster access, 
-              offline reporting, and push notifications.
+              {t('installPromptMessage')}
             </p>
             
             <div className="flex space-x-2">
@@ -56,7 +57,7 @@ export function PWAInstallPrompt() {
                 data-testid="button-install-app"
               >
                 <Download className="h-4 w-4 mr-2" />
-                Install App
+                {t('install')}
               </Button>
             </div>
           </div>

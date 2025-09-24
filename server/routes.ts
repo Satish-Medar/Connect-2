@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, requireAuth, requireRole } from "./auth";
-import { analyzeIssueImage, detectDuplicateIssue } from "./gemini";
+import { analyzeIssueImage, detectDuplicateIssue, findSimilarIssues, normalizeLocation } from "./gemini";
 import multer from "multer";
 import sharp from "sharp";
 import { insertIssueSchema, insertValidationSchema, insertCommentSchema } from "@shared/schema";
@@ -85,30 +85,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reporterId: req.user!.id
       });
 
-      // Check for duplicates if we have existing issues nearby
+      // Check for similar issues nearby and return them for user decision
       if (issueData.latitude && issueData.longitude) {
+        const normalizedLocation = normalizeLocation(issueData.address || "");
+        
+        // Search with larger radius for better detection
         const nearbyIssues = await storage.getIssuesNearLocation(
           parseFloat(issueData.latitude),
           parseFloat(issueData.longitude),
-          0.1 // 100m radius
+          0.5 // 500m radius for better coverage
         );
 
         if (nearbyIssues.length > 0) {
-          const duplicateCheck = await detectDuplicateIssue(
-            issueData.description || issueData.title,
-            issueData.category,
+          const similarityCheck = await findSimilarIssues(
+            {
+              title: issueData.title,
+              description: issueData.description || "",
+              category: issueData.category,
+              location: normalizedLocation,
+              imageUrl: issueData.imageUrl
+            },
             nearbyIssues.map(i => ({
+              id: i.id,
               title: i.title,
               description: i.description || "",
-              category: i.category
+              category: i.category,
+              location: normalizeLocation(i.address || ""),
+              imageUrl: i.imageUrl,
+              reportedBy: i.reporter?.username || "Anonymous",
+              createdAt: i.createdAt,
+              validationCount: i.validationCount,
+              status: i.status
             }))
           );
 
-          if (duplicateCheck.isDuplicate && duplicateCheck.confidence > 0.8) {
-            return res.status(409).json({
-              message: "Potential duplicate issue detected",
-              similarIssue: duplicateCheck.similarIssueId,
-              confidence: duplicateCheck.confidence
+          // If we find similar issues with medium to high confidence, return them
+          if (similarityCheck.similarIssues && similarityCheck.similarIssues.length > 0) {
+            return res.status(200).json({
+              type: "similar_issues_found",
+              message: "Similar issues found in your area",
+              similarIssues: similarityCheck.similarIssues,
+              submittedIssue: issueData,
+              canProceedAnyway: true
             });
           }
         }
@@ -176,6 +194,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get issue failed:", error);
       res.status(500).json({ message: "Failed to fetch issue" });
+    }
+  });
+
+  // Upvote an issue
+  app.post("/api/issues/:id/upvote", requireAuth, async (req, res) => {
+    try {
+      const issueId = req.params.id;
+      const userId = req.user!.id;
+
+      // Check if issue exists
+      const issue = await storage.getIssue(issueId);
+      if (!issue) {
+        return res.status(404).json({ message: "Issue not found" });
+      }
+
+      // Create a validation (upvote) for this issue
+      await storage.createValidation({
+        issueId,
+        userId,
+        isValid: true,
+        note: "Upvoted via similar issues dialog"
+      });
+
+      // Award points to the user for validating
+      await storage.updateUserPoints(userId, 2);
+
+      // Update the issue's validation count
+      const updatedIssue = await storage.updateIssue(issueId, {
+        validationCount: (issue.validationCount || 0) + 1
+      });
+
+      res.json({ 
+        message: "Issue upvoted successfully",
+        validationCount: updatedIssue?.validationCount || 0
+      });
+    } catch (error) {
+      console.error("Upvote issue failed:", error);
+      res.status(500).json({ message: "Failed to upvote issue" });
     }
   });
 
