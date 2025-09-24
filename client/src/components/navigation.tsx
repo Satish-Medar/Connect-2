@@ -9,9 +9,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MapPin, Bell, User, LogOut, Settings } from "lucide-react";
 import { Link } from "wouter";
+import { LanguageSelector } from "./language-selector";
+import { useTranslation } from 'react-i18next';
 
 export function Navigation() {
   const { user, logoutMutation } = useAuth();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -27,18 +30,20 @@ export function Navigation() {
                 <MapPin className="text-primary-foreground text-xl" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">CivicConnect</h1>
+                <h1 className="text-xl font-bold">{t('appName')}</h1>
                 <p className="text-xs text-muted-foreground">Smart Civic Reporting</p>
               </div>
             </div>
           </Link>
           
           <div className="flex items-center space-x-4">
+            <LanguageSelector />
+            
             {user && (
               <>
                 <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20" data-testid="nav-points">
                   <span className="mr-1">🏆</span>
-                  {user.points.toLocaleString()} pts
+                  {user.points.toLocaleString()} {t('points')}
                 </Badge>
                 
                 <Button variant="ghost" size="icon" data-testid="nav-notifications">
@@ -54,7 +59,7 @@ export function Navigation() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem data-testid="menu-profile">
                       <User className="mr-2 h-4 w-4" />
-                      Profile
+                      {t('profile')}
                     </DropdownMenuItem>
                     <DropdownMenuItem data-testid="menu-settings">
                       <Settings className="mr-2 h-4 w-4" />
@@ -62,7 +67,7 @@ export function Navigation() {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
                       <LogOut className="mr-2 h-4 w-4" />
-                      Logout
+                      {t('logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
